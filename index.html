@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rameswara & Anandvann — Monthly Marketing Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.18);--text:#1a1a18;--text2:#6b6b65;--text3:#9a9a93;--blue:#0C447C;--blue2:#185FA5;--blue-l:#E6F1FB;--green:#085041;--green2:#0F6E56;--green-l:#E1F5EE;--maroon:#4A1528;--maroon2:#72243E;--maroon-l:#FBEAF0;--up:#3B6D11;--dn:#A32D2D;--up-bg:#EAF3DE;--dn-bg:#FCEBEB;--r:10px;--rs:6px;}
+@media(prefers-color-scheme:dark){:root{--bg:#18181a;--surface:#222224;--surface2:#2a2a2c;--border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.18);--text:#f0f0ec;--text2:#a0a09a;--text3:#6a6a65;--blue-l:#0C2A4A;--green-l:#042E24;--maroon-l:#2A0C18;--up-bg:#1a2e0a;--dn-bg:#2e0e0e;}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap;}
+.app-logo{font-size:15px;font-weight:600;white-space:nowrap;}
+.app-logo span{color:var(--text2);font-weight:400;}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.month-nav{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:4px 8px;}
+.month-nav button{background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;}
+.month-nav button:hover{color:var(--text);}
+.month-label{font-size:13px;font-weight:600;min-width:110px;text-align:center;color:var(--text);}
+.sync-badge{font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500;white-space:nowrap;}
+.s-ok{background:var(--up-bg);color:var(--up);}
+.s-err{background:var(--dn-bg);color:var(--dn);}
+.s-load{background:var(--surface2);color:var(--text2);}
+.btn-save{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.btn-save:hover{background:var(--blue2);}
+.btn-save:disabled{opacity:0.5;cursor:not-allowed;}
+.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 24px;overflow-x:auto;}
+.tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.ar{color:var(--blue);border-bottom-color:var(--blue);}
+.tab.aa{color:var(--green);border-bottom-color:var(--green);}
+.tab.ac{color:var(--maroon);border-bottom-color:var(--maroon);}
+.content{max-width:1100px;margin:0 auto;padding:24px;}
+.panel{display:none;}.panel.active{display:block;}
+.banner-r{background:var(--blue);color:var(--blue-l);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.banner-a{background:var(--green);color:var(--green-l);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.banner-c{background:var(--maroon);color:var(--maroon-l);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.banner-left{display:flex;align-items:center;gap:14px;}
+.bicon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.bi-r{background:var(--blue2);}.bi-a{background:var(--green2);}.bi-c{background:var(--maroon2);}
+.btitle{font-size:17px;font-weight:600;}.bsub{font-size:11px;opacity:.75;margin-top:2px;}
+.banner-month{font-size:13px;font-weight:500;opacity:.85;background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:999px;}
+.st{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px;}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.ov-label{font-size:10px;color:var(--text2);margin-bottom:4px;}
+.ov-value{font-size:20px;font-weight:700;color:var(--text);}
+.ov-delta{font-size:10px;margin-top:3px;min-height:14px;}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:8px;}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.mc-label{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:2px;}
+.mc-purpose{font-size:9px;color:var(--text3);margin-bottom:6px;line-height:1.4;font-style:italic;}
+.mc input{width:100%;font-size:20px;font-weight:600;color:var(--text);background:transparent;border:none;outline:none;border-bottom:1.5px solid var(--border2);padding-bottom:2px;}
+.mc input:focus{border-bottom-color:#378ADD;}
+.mc-delta{font-size:10px;margin-top:5px;min-height:14px;}
+.dup{color:var(--up);background:var(--up-bg);padding:1px 6px;border-radius:999px;display:inline-block;}
+.ddn{color:var(--dn);background:var(--dn-bg);padding:1px 6px;border-radius:999px;display:inline-block;}
+.dfl{color:var(--text3);}
+.cl{display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
+.ci{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;cursor:pointer;}
+.ci:hover{border-color:var(--border2);}
+.ci.checked{border-color:var(--up);background:var(--up-bg);}
+.ci input[type=checkbox]{margin-top:1px;flex-shrink:0;accent-color:var(--up);width:14px;height:14px;cursor:pointer;}
+.ci-body{display:flex;flex-direction:column;gap:2px;}
+.ci-lbl{font-size:12px;color:var(--text);font-weight:500;}
+.ci-pur{font-size:10px;color:var(--text2);line-height:1.4;font-style:italic;}
+.tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--surface2);padding:8px 10px;text-align:left;font-weight:600;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:.04em;}
+.th-sub{font-size:9px;font-weight:400;color:var(--text3);font-style:italic;display:block;text-transform:none;letter-spacing:0;margin-top:1px;}
+tbody tr{border-top:1px solid var(--border);}
+tbody tr:hover{background:var(--surface2);}
+td{padding:7px 10px;color:var(--text);}
+td input,td select{width:100%;background:transparent;border:none;outline:none;font-size:12px;color:var(--text);font-family:inherit;}
+td input:focus{border-bottom:1px solid var(--border2);}
+.na{width:100%;min-height:72px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:12px;resize:vertical;font-family:inherit;}
+.na:focus{outline:none;border-color:var(--border2);}
+.charts-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.charts-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.chart-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.chart-sub{font-size:10px;color:var(--text2);margin-bottom:12px;font-style:italic;}
+.chart-empty{font-size:11px;color:var(--text3);text-align:center;padding:28px 0;font-style:italic;}
+.funnel-wrap{display:flex;flex-direction:column;gap:7px;padding:4px 0;}
+.funnel-row{display:flex;align-items:center;gap:10px;}
+.funnel-label{font-size:11px;color:var(--text2);width:110px;flex-shrink:0;}
+.funnel-bar-bg{flex:1;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.funnel-bar-fill{height:100%;border-radius:4px;transition:width 0.4s;}
+.funnel-val{font-size:11px;font-weight:600;color:var(--text);width:54px;text-align:right;flex-shrink:0;}
+.kw-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.kw-bar-label{font-size:10px;color:var(--text2);width:70px;flex-shrink:0;}
+.kw-bar-bg{flex:1;height:16px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.kw-bar-fill{height:100%;border-radius:3px;transition:width 0.4s;}
+.kw-bar-val{font-size:10px;font-weight:600;color:var(--text);width:36px;text-align:right;}
+.ai-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px;}
+.ai-cell{background:var(--surface2);border-radius:var(--rs);padding:7px 4px;text-align:center;}
+.ai-name{font-size:9px;font-weight:600;color:var(--text2);margin-bottom:3px;}
+.ai-icon{font-size:15px;}
+.spend-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.spend-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.spend-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.spend-logo{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.spend-logo-meta{background:#0866FF;}
+.spend-logo-google{background:#EA4335;}
+.spend-card-name{font-size:12px;font-weight:600;color:var(--text);}
+.spend-card-sub{font-size:10px;color:var(--text2);}
+.spend-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.spend-field label{font-size:9px;color:var(--text3);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
+.spend-field input,.spend-field select{width:100%;font-size:16px;font-weight:600;color:var(--text);background:transparent;border:none;outline:none;border-bottom:1.5px solid var(--border2);padding-bottom:2px;font-family:inherit;}
+.spend-field input:focus,.spend-field select:focus{border-bottom-color:#378ADD;}
+.spend-total{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);display:flex;justify-content:space-between;}
+.spend-total-val{font-weight:600;color:var(--text);}
+.creatives-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.creative-count-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center;}
+.creative-count-label{font-size:10px;color:var(--text2);margin-bottom:4px;}
+.creative-count-val{font-size:22px;font-weight:700;color:var(--text);}
+.creative-count-target{font-size:9px;color:var(--text3);margin-top:2px;}
+.top-creatives-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px;}
+.top-creative-row{display:grid;grid-template-columns:24px 1fr 90px 80px 70px 80px;gap:10px;align-items:center;padding:8px 12px;border-top:1px solid var(--border);font-size:12px;}
+.top-creative-row:first-child{border-top:none;}
+.top-creative-header{background:var(--surface2);font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;}
+.rank-badge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.r1{background:#B8860B;}.r2{background:#6B6B6B;}.r3{background:#8B4513;}.r4,.r5{background:var(--surface2);color:var(--text2);}
+.history-toggle{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;}
+.history-toggle:hover{background:var(--surface2);}
+.history-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
+.history-body.open{display:block;}
+.hist-row{padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;}
+.hist-month{font-weight:600;color:var(--text);font-size:12px;}
+.hist-metrics{display:flex;flex-wrap:wrap;gap:10px;}
+.hm{display:flex;flex-direction:column;gap:1px;}
+.hml{font-size:9px;color:var(--text3);}
+.hmv{font-size:12px;font-weight:500;color:var(--text);}
+.save-bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.save-status{font-size:12px;color:var(--text2);}
+.save-status.ok{color:var(--up);font-weight:500;}
+.save-status.err{color:var(--dn);font-weight:500;}
+.save-actions{display:flex;gap:8px;}
+.btn-sec{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text);}
+.btn-sec:hover{background:var(--border);}
+@media(max-width:700px){.charts-2col,.charts-3col,.spend-split{grid-template-columns:1fr;}.content{padding:14px;}.mg{grid-template-columns:1fr 1fr;}.hist-row{grid-template-columns:1fr;}.creatives-summary{grid-template-columns:1fr 1fr;}.top-creative-row{grid-template-columns:24px 1fr 70px 60px;}.top-creative-row .hm-col{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-logo">Rameswara <span>Monthly Tracker</span></div>
+  <div class="header-right">
+    <span class="sync-badge s-load" id="sync-badge">⏳ connecting...</span>
+    <div class="month-nav">
+      <button onclick="cm(-1)">&#8592;</button>
+      <div class="month-label" id="ml-header"></div>
+      <button onclick="cm(1)">&#8594;</button>
+    </div>
+    <button class="btn-save" id="btn-save" onclick="saveMonth()" disabled>💾 Save month</button>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab ar" onclick="sw('r',this)">🏢 Rameswara</div>
+  <div class="tab" onclick="sw('a',this)">🌿 Anandvann</div>
+  <div class="tab" onclick="sw('c',this)">🛡️ Oversight</div>
+</div>
+
+<div class="content">
+
+<!-- ===== RAMESWARA ===== -->
+<div id="panel-r" class="panel active">
+  <div class="banner-r">
+    <div class="banner-left"><div class="bicon bi-r">🏢</div><div><div class="btitle">Rameswara</div><div class="bsub">Corporate brand · Parent group</div></div></div>
+    <div class="banner-month" id="bm-r">—</div>
+  </div>
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-label">IG Followers</div><div class="ov-value" id="ov-r-ig">—</div><div class="ov-delta" id="ovd-r-ig"></div></div>
+    <div class="ov-card"><div class="ov-label">Organic Visits</div><div class="ov-value" id="ov-r-organic">—</div><div class="ov-delta" id="ovd-r-organic"></div></div>
+    <div class="ov-card"><div class="ov-label">Engagement %</div><div class="ov-value" id="ov-r-eng">—</div><div class="ov-delta" id="ovd-r-eng"></div></div>
+    <div class="ov-card"><div class="ov-label">Meta Spend ₹</div><div class="ov-value" id="ov-r-meta-spend">—</div><div class="ov-delta" id="ovd-r-meta-spend"></div></div>
+    <div class="ov-card"><div class="ov-label">Google Spend ₹</div><div class="ov-value" id="ov-r-google-spend">—</div><div class="ov-delta" id="ovd-r-google-spend"></div></div>
+    <div class="ov-card"><div class="ov-label">Creatives</div><div class="ov-value" id="ov-r-creatives-total">—</div><div class="ov-delta" id="ovd-r-creatives-total"></div></div>
+    <div class="ov-card"><div class="ov-label">Backlinks</div><div class="ov-value" id="ov-r-bl">—</div><div class="ov-delta" id="ovd-r-bl"></div></div>
+  </div>
+
+  <div class="st">Visual analytics</div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">Followers trend</div><div class="chart-sub">Instagram + Facebook month on month</div><div style="position:relative;height:180px;"><canvas id="chart-r-followers"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Organic traffic</div><div class="chart-sub">Website visits from Google (GA4) month on month</div><div style="position:relative;height:180px;"><canvas id="chart-r-organic"></canvas></div></div>
+  </div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">Engagement breakdown</div><div class="chart-sub">Rate, saves, shares, story completion</div><div style="position:relative;height:160px;"><canvas id="chart-r-eng"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Meta vs Google spend</div><div class="chart-sub">Monthly spend split</div><div style="position:relative;height:160px;"><canvas id="chart-r-spend-split"></canvas></div></div>
+  </div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">SEO health</div><div class="chart-sub">Backlinks built + domain authority trend</div><div style="position:relative;height:160px;"><canvas id="chart-r-seo"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Creatives delivered vs target</div><div class="chart-sub">By format — monthly target is 16 total</div><div style="position:relative;height:160px;"><canvas id="chart-r-creatives"></canvas></div></div>
+  </div>
+
+  <div class="st">Social media metrics</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Instagram followers</div><div class="mc-purpose">Total follower count at end of month</div><input type="number" id="r-ig" placeholder="0" oninput="upOv('r','ig');rRC()"><div class="mc-delta" id="d-r-ig"></div></div>
+    <div class="mc"><div class="mc-label">Facebook followers</div><div class="mc-purpose">Total page followers at end of month</div><input type="number" id="r-fb" placeholder="0" oninput="upOv('r','fb');rRC()"><div class="mc-delta" id="d-r-fb"></div></div>
+    <div class="mc"><div class="mc-label">Total reach</div><div class="mc-purpose">Total unique people who saw posts this month</div><input type="number" id="r-reach" placeholder="0" oninput="upOv('r','reach')"><div class="mc-delta" id="d-r-reach"></div></div>
+    <div class="mc"><div class="mc-label">Avg engagement rate %</div><div class="mc-purpose">Monthly average. Above 3% = resonating. Below 1% = ignored</div><input type="number" id="r-eng" placeholder="0.0" step="0.1" oninput="upOv('r','eng');rRC()"><div class="mc-delta" id="d-r-eng"></div></div>
+    <div class="mc"><div class="mc-label">Avg story completion %</div><div class="mc-purpose">Monthly average % who watched stories till end</div><input type="number" id="r-scr" placeholder="0" oninput="rRC()"><div class="mc-delta" id="d-r-scr"></div></div>
+    <div class="mc"><div class="mc-label">Total saves</div><div class="mc-purpose">Total post saves across all content this month</div><input type="number" id="r-saves" placeholder="0" oninput="rRC()"><div class="mc-delta" id="d-r-saves"></div></div>
+    <div class="mc"><div class="mc-label">Total shares</div><div class="mc-purpose">Total shares across all content this month</div><input type="number" id="r-shares" placeholder="0" oninput="rRC()"><div class="mc-delta" id="d-r-shares"></div></div>
+  </div>
+
+  <div class="st">Creatives delivered this month</div>
+  <div class="creatives-summary">
+    <div class="creative-count-card">
+      <div class="creative-count-label">Static posts</div>
+      <div class="creative-count-val" id="r-c-static-display">0</div>
+      <input type="number" id="r-c-static" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('r');rRC()">
+    </div>
+    <div class="creative-count-card">
+      <div class="creative-count-label">Carousels</div>
+      <div class="creative-count-val" id="r-c-carousel-display">0</div>
+      <input type="number" id="r-c-carousel" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('r');rRC()">
+    </div>
+    <div class="creative-count-card">
+      <div class="creative-count-label">Reels / Videos</div>
+      <div class="creative-count-val" id="r-c-reel-display">0</div>
+      <input type="number" id="r-c-reel" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('r');rRC()">
+    </div>
+    <div class="creative-count-card" style="border-color:var(--blue);background:var(--blue-l);">
+      <div class="creative-count-label" style="color:var(--blue);">Total delivered</div>
+      <div class="creative-count-val" id="r-creatives-total" style="color:var(--blue);">0</div>
+      <div class="creative-count-target">Target: 16/month</div>
+    </div>
+  </div>
+
+  <div class="st">Top 5 creatives by reach this month</div>
+  <div class="top-creatives-wrap">
+    <div class="top-creative-row top-creative-header">
+      <div>#</div><div>Creative name / description</div><div>Format</div><div>Reach</div>
+      <div class="hm-col">Eng %</div><div class="hm-col">Platform</div>
+    </div>
+    <div class="top-creative-row"><div><div class="rank-badge r1">1</div></div><td><input id="r-tc1-name" placeholder="e.g. Project launch reel"></td><td><select id="r-tc1-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option></select></td><td><input type="number" id="r-tc1-reach" placeholder="0" oninput="rRC()"></td><td class="hm-col"><input type="number" id="r-tc1-eng" placeholder="0.0"></td><td class="hm-col"><select id="r-tc1-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r2">2</div></div><td><input id="r-tc2-name" placeholder="Creative name"></td><td><select id="r-tc2-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option></select></td><td><input type="number" id="r-tc2-reach" placeholder="0" oninput="rRC()"></td><td class="hm-col"><input type="number" id="r-tc2-eng" placeholder="0.0"></td><td class="hm-col"><select id="r-tc2-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r3">3</div></div><td><input id="r-tc3-name" placeholder="Creative name"></td><td><select id="r-tc3-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option></select></td><td><input type="number" id="r-tc3-reach" placeholder="0" oninput="rRC()"></td><td class="hm-col"><input type="number" id="r-tc3-eng" placeholder="0.0"></td><td class="hm-col"><select id="r-tc3-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r4">4</div></div><td><input id="r-tc4-name" placeholder="Creative name"></td><td><select id="r-tc4-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option></select></td><td><input type="number" id="r-tc4-reach" placeholder="0" oninput="rRC()"></td><td class="hm-col"><input type="number" id="r-tc4-eng" placeholder="0.0"></td><td class="hm-col"><select id="r-tc4-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r5">5</div></div><td><input id="r-tc5-name" placeholder="Creative name"></td><td><select id="r-tc5-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option></select></td><td><input type="number" id="r-tc5-reach" placeholder="0" oninput="rRC()"></td><td class="hm-col"><input type="number" id="r-tc5-eng" placeholder="0.0"></td><td class="hm-col"><select id="r-tc5-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+  </div>
+
+  <div class="st">Monthly delivery checks</div>
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">All 16 creatives delivered this month</span><span class="ci-pur">Contract requires 16 monthly creatives — track if fully delivered</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Content calendar shared for this month</span><span class="ci-pur">Monthly calendar should be shared in advance for approval</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Monthly performance report received by 7th</span><span class="ci-pur">Contract requires MPR delivered by the 7th of the following month</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Outdoor hoarding creative delivered</span><span class="ci-pur">Included in retainer per contract</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Formats varied — static, carousel, reel, story</span><span class="ci-pur">Only static posts means missed reach from reels and stories</span></div></label>
+  </div>
+
+  <div class="st">SEO metrics — monthly (30 keywords)</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Organic visits (GA4)</div><div class="mc-purpose">Total website visits from Google this month</div><input type="number" id="r-organic" placeholder="0" oninput="upOv('r','organic');rRC()"><div class="mc-delta" id="d-r-organic"></div></div>
+    <div class="mc"><div class="mc-label">Domain authority</div><div class="mc-purpose">Google trust score. Even +1/month is progress</div><input type="number" id="r-da" placeholder="0" oninput="rRC()"><div class="mc-delta" id="d-r-da"></div></div>
+    <div class="mc"><div class="mc-label">Backlinks built</div><div class="mc-purpose">Target ~30/month per contract</div><input type="number" id="r-bl" placeholder="0" oninput="upOv('r','bl');rRC()"><div class="mc-delta" id="d-r-bl"></div></div>
+    <div class="mc"><div class="mc-label">Bounce rate %</div><div class="mc-purpose">Above 70% = not finding what expected. Lower is better</div><input type="number" id="r-bounce" placeholder="0" oninput="upOv('r','bounce',true)"><div class="mc-delta" id="d-r-bounce"></div></div>
+    <div class="mc"><div class="mc-label">Avg session duration (sec)</div><div class="mc-purpose">Monthly average. Longer = more interest. Under 30s = red flag</div><input type="number" id="r-session" placeholder="0" oninput="upOv('r','session')"><div class="mc-delta" id="d-r-session"></div></div>
+    <div class="mc"><div class="mc-label">Blogs published</div><div class="mc-purpose">Contract requires 5 blogs/month of 800–1000 words</div><input type="number" id="r-blogs" placeholder="0 / 5"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Blogs indexed on Google</div><div class="mc-purpose">Published does not mean indexed. Unindexed blogs never appear in search</div><input type="number" id="r-indexed" placeholder="0"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Business listings added</div><div class="mc-purpose">Improves local SEO and near me results</div><input type="number" id="r-listings" placeholder="0"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Quora/forum answers</div><div class="mc-purpose">Off-page authority and targeted traffic</div><input type="number" id="r-quora" placeholder="0"><div class="mc-delta"></div></div>
+  </div>
+
+  <div class="st">AI engine visibility — monthly check</div>
+  <div class="ai-grid">
+    <div class="ai-cell"><div class="ai-name">ChatGPT</div><div class="ai-icon" id="ai-r-0">—</div></div>
+    <div class="ai-cell"><div class="ai-name">Gemini</div><div class="ai-icon" id="ai-r-1">—</div></div>
+    <div class="ai-cell"><div class="ai-name">Perplexity</div><div class="ai-icon" id="ai-r-2">—</div></div>
+    <div class="ai-cell"><div class="ai-name">Bing</div><div class="ai-icon" id="ai-r-3">—</div></div>
+    <div class="ai-cell"><div class="ai-name">Grok</div><div class="ai-icon" id="ai-r-4">—</div></div>
+  </div>
+  <div class="tw"><table><thead><tr><th>Platform</th><th>Visible?<span class="th-sub">Does brand appear in AI answers?</span></th><th>Query tested<span class="th-sub">What you searched this month</span></th></tr></thead><tbody>
+    <tr><td>ChatGPT</td><td><select onchange="uAI('r',0,this.value)"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></td><td><input placeholder="e.g. top developers Kolkata"></td></tr>
+    <tr><td>Gemini</td><td><select onchange="uAI('r',1,this.value)"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></td><td><input placeholder="query used"></td></tr>
+    <tr><td>Perplexity</td><td><select onchange="uAI('r',2,this.value)"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></td><td><input placeholder="query used"></td></tr>
+    <tr><td>Bing Copilot</td><td><select onchange="uAI('r',3,this.value)"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></td><td><input placeholder="query used"></td></tr>
+    <tr><td>Grok</td><td><select onchange="uAI('r',4,this.value)"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></td><td><input placeholder="query used"></td></tr>
+  </tbody></table></div>
+
+  <div class="st">Meta vs Google — monthly spend breakdown</div>
+  <div class="spend-split">
+    <div class="spend-card">
+      <div class="spend-card-header"><div class="spend-logo spend-logo-meta">f</div><div><div class="spend-card-name">Meta Ads</div><div class="spend-card-sub">Facebook + Instagram — monthly total</div></div></div>
+      <div class="spend-fields">
+        <div class="spend-field"><label>Spend (₹)</label><input type="number" id="r-meta-spend" placeholder="0" oninput="updateSpendTotal('r');upOv('r','meta-spend');rRC()"></div>
+        <div class="spend-field"><label>Reach</label><input type="number" id="r-meta-reach" placeholder="0"></div>
+        <div class="spend-field"><label>Clicks</label><input type="number" id="r-meta-clicks" placeholder="0"></div>
+        <div class="spend-field"><label>CTR %</label><input type="number" id="r-meta-ctr" placeholder="0.0" step="0.1"></div>
+        <div class="spend-field"><label>CPC (₹)</label><input type="number" id="r-meta-cpc" placeholder="0"></div>
+        <div class="spend-field"><label>CPM (₹)</label><input type="number" id="r-meta-cpm" placeholder="0"></div>
+      </div>
+      <div class="spend-total"><span>Monthly spend</span><span class="spend-total-val" id="r-meta-spend-display">₹ 0</span></div>
+    </div>
+    <div class="spend-card">
+      <div class="spend-card-header"><div class="spend-logo spend-logo-google">G</div><div><div class="spend-card-name">Google Ads</div><div class="spend-card-sub">Search + Display + YouTube — monthly total</div></div></div>
+      <div class="spend-fields">
+        <div class="spend-field"><label>Spend (₹)</label><input type="number" id="r-google-spend" placeholder="0" oninput="updateSpendTotal('r');upOv('r','google-spend');rRC()"></div>
+        <div class="spend-field"><label>Impressions</label><input type="number" id="r-google-impressions" placeholder="0"></div>
+        <div class="spend-field"><label>Clicks</label><input type="number" id="r-google-clicks" placeholder="0"></div>
+        <div class="spend-field"><label>CTR %</label><input type="number" id="r-google-ctr" placeholder="0.0" step="0.1"></div>
+        <div class="spend-field"><label>CPC (₹)</label><input type="number" id="r-google-cpc" placeholder="0"></div>
+        <div class="spend-field"><label>Quality Score</label><input type="number" id="r-google-qs" placeholder="0–10"></div>
+      </div>
+      <div class="spend-total"><span>Monthly spend</span><span class="spend-total-val" id="r-google-spend-display">₹ 0</span></div>
+    </div>
+  </div>
+  <div class="mc" style="margin-bottom:8px;"><div class="mc-label">Combined total spend this month (₹)</div><div class="mc-purpose">Auto-calculated from Meta + Google above</div><input type="number" id="r-spend" placeholder="0" readonly style="opacity:0.7;cursor:not-allowed;"><div class="mc-delta" id="d-r-spend"></div></div>
+
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Media plan received before campaigns launched this month</span><span class="ci-pur">No campaign should go live without your written approval</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Monthly campaign performance report received</span><span class="ci-pur">Should cover all platforms with spend, reach, clicks, and conversions</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Meta Business Manager own admin access active</span><span class="ci-pur">Own access lets you verify monthly spend and performance independently</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Google Ads own admin access active</span><span class="ci-pur">Ensures you retain all campaign history if agency relationship ends</span></div></label>
+  </div>
+
+  <div class="st">Monthly notes</div>
+  <textarea class="na" id="r-notes" placeholder="Month summary — what worked, what didn't, creative observations, agency performance, action items for next month..."></textarea>
+  <div style="margin-top:20px;"><button class="history-toggle" onclick="toggleHist('r')">View saved months history</button><div class="history-body" id="hb-r"></div></div>
+</div>
+
+<!-- ===== ANANDVANN ===== -->
+<div id="panel-a" class="panel">
+  <div class="banner-a">
+    <div class="banner-left"><div class="bicon bi-a">🌿</div><div><div class="btitle">Anandvann</div><div class="bsub">Project · Under Rameswara group</div></div></div>
+    <div class="banner-month" id="bm-a">—</div>
+  </div>
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-label">Total Leads</div><div class="ov-value" id="ov-a-leads">—</div><div class="ov-delta" id="ovd-a-leads"></div></div>
+    <div class="ov-card"><div class="ov-label">CPL ₹</div><div class="ov-value" id="ov-a-cpl">—</div><div class="ov-delta" id="ovd-a-cpl"></div></div>
+    <div class="ov-card"><div class="ov-label">Site Visits</div><div class="ov-value" id="ov-a-sv">—</div><div class="ov-delta" id="ovd-a-sv"></div></div>
+    <div class="ov-card"><div class="ov-label">Bookings</div><div class="ov-value" id="ov-a-book">—</div><div class="ov-delta" id="ovd-a-book"></div></div>
+    <div class="ov-card"><div class="ov-label">Meta Spend ₹</div><div class="ov-value" id="ov-a-meta-spend">—</div><div class="ov-delta" id="ovd-a-meta-spend"></div></div>
+    <div class="ov-card"><div class="ov-label">Google Spend ₹</div><div class="ov-value" id="ov-a-google-spend">—</div><div class="ov-delta" id="ovd-a-google-spend"></div></div>
+    <div class="ov-card"><div class="ov-label">ROAS</div><div class="ov-value" id="ov-a-roas">—</div><div class="ov-delta" id="ovd-a-roas"></div></div>
+    <div class="ov-card"><div class="ov-label">Creatives</div><div class="ov-value" id="ov-a-creatives-total">—</div><div class="ov-delta" id="ovd-a-creatives-total"></div></div>
+  </div>
+
+  <div class="st">Visual analytics</div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">Lead generation trend</div><div class="chart-sub">Total leads per month — green up, red down</div><div style="position:relative;height:180px;"><canvas id="chart-a-leads"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">CPL trend ₹</div><div class="chart-sub">Cost per lead month on month — lower is better</div><div style="position:relative;height:180px;"><canvas id="chart-a-cpl"></canvas></div></div>
+  </div>
+  <div class="charts-3col">
+    <div class="chart-card"><div class="chart-title">Lead conversion funnel</div><div class="chart-sub">Leads → Site visits → Bookings</div><div class="funnel-wrap" id="funnel-a"></div></div>
+    <div class="chart-card"><div class="chart-title">Meta vs Google spend</div><div class="chart-sub">Monthly spend split for Anandvann</div><div style="position:relative;height:160px;"><canvas id="chart-a-spend-split"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Spend vs leads efficiency</div><div class="chart-sub">Monthly spend (bars) vs leads (line)</div><div style="position:relative;height:160px;"><canvas id="chart-a-eff"></canvas></div></div>
+  </div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">Top 5 creatives reach</div><div class="chart-sub">Best performing Anandvann creatives this month</div><div style="position:relative;height:160px;"><canvas id="chart-a-topcreatives"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Landing page performance</div><div class="chart-sub">Visits, conversion rate and bounce rate</div><div style="position:relative;height:160px;"><canvas id="chart-a-lp"></canvas></div></div>
+  </div>
+
+  <div class="st">Lead generation — monthly</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Total leads this month</div><div class="mc-purpose">Total enquiries received for Anandvann this month</div><input type="number" id="a-leads" placeholder="0" oninput="upOv('a','leads');rAC()"><div class="mc-delta" id="d-a-leads"></div></div>
+    <div class="mc"><div class="mc-label">CPL (₹)</div><div class="mc-purpose">Monthly spend ÷ total leads. Track this relentlessly</div><input type="number" id="a-cpl" placeholder="0" oninput="upOv('a','cpl',true);rAC()"><div class="mc-delta" id="d-a-cpl"></div></div>
+    <div class="mc"><div class="mc-label">Leads to site visits</div><div class="mc-purpose">How many leads actually visited the project site this month</div><input type="number" id="a-sv" placeholder="0" oninput="upOv('a','sv');rAC()"><div class="mc-delta" id="d-a-sv"></div></div>
+    <div class="mc"><div class="mc-label">Cost per site visit (₹)</div><div class="mc-purpose">More meaningful than CPL for real estate</div><input type="number" id="a-csv" placeholder="0" oninput="upOv('a','csv',true)"><div class="mc-delta" id="d-a-csv"></div></div>
+    <div class="mc"><div class="mc-label">Site visits to bookings</div><div class="mc-purpose">The ultimate monthly conversion metric for real estate</div><input type="number" id="a-book" placeholder="0" oninput="upOv('a','book');rAC()"><div class="mc-delta" id="d-a-book"></div></div>
+    <div class="mc"><div class="mc-label">ROAS</div><div class="mc-purpose">Revenue generated ÷ total ad spend this month</div><input type="number" id="a-roas" placeholder="0.0" step="0.1" oninput="upOv('a','roas')"><div class="mc-delta" id="d-a-roas"></div></div>
+    <div class="mc"><div class="mc-label">Landing page conv rate %</div><div class="mc-purpose">Monthly average. Below 2% means page needs fixing</div><input type="number" id="a-lpcr" placeholder="0.0" step="0.1" oninput="upOv('a','lpcr');rAC()"><div class="mc-delta" id="d-a-lpcr"></div></div>
+  </div>
+
+  <div class="st">Meta vs Google — monthly spend breakdown</div>
+  <div class="spend-split">
+    <div class="spend-card">
+      <div class="spend-card-header"><div class="spend-logo spend-logo-meta">f</div><div><div class="spend-card-name">Meta Ads</div><div class="spend-card-sub">Facebook + Instagram — monthly total</div></div></div>
+      <div class="spend-fields">
+        <div class="spend-field"><label>Spend (₹)</label><input type="number" id="a-meta-spend" placeholder="0" oninput="updateSpendTotal('a');upOv('a','meta-spend');rAC()"></div>
+        <div class="spend-field"><label>Leads</label><input type="number" id="a-meta-leads" placeholder="0" oninput="rAC()"></div>
+        <div class="spend-field"><label>CPL (₹)</label><input type="number" id="a-meta-cpl" placeholder="0"></div>
+        <div class="spend-field"><label>CTR %</label><input type="number" id="a-meta-ctr" placeholder="0.0" step="0.1"></div>
+        <div class="spend-field"><label>CPC (₹)</label><input type="number" id="a-meta-cpc" placeholder="0"></div>
+        <div class="spend-field"><label>Quality</label><select id="a-meta-quality"><option>—</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+      </div>
+      <div class="spend-total"><span>Monthly spend</span><span class="spend-total-val" id="a-meta-spend-display">₹ 0</span></div>
+    </div>
+    <div class="spend-card">
+      <div class="spend-card-header"><div class="spend-logo spend-logo-google">G</div><div><div class="spend-card-name">Google Ads</div><div class="spend-card-sub">Search + Display + YouTube — monthly total</div></div></div>
+      <div class="spend-fields">
+        <div class="spend-field"><label>Spend (₹)</label><input type="number" id="a-google-spend" placeholder="0" oninput="updateSpendTotal('a');upOv('a','google-spend');rAC()"></div>
+        <div class="spend-field"><label>Leads</label><input type="number" id="a-google-leads" placeholder="0" oninput="rAC()"></div>
+        <div class="spend-field"><label>CPL (₹)</label><input type="number" id="a-google-cpl" placeholder="0"></div>
+        <div class="spend-field"><label>CTR %</label><input type="number" id="a-google-ctr" placeholder="0.0" step="0.1"></div>
+        <div class="spend-field"><label>CPC (₹)</label><input type="number" id="a-google-cpc" placeholder="0"></div>
+        <div class="spend-field"><label>Quality</label><select id="a-google-quality"><option>—</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+      </div>
+      <div class="spend-total"><span>Monthly spend</span><span class="spend-total-val" id="a-google-spend-display">₹ 0</span></div>
+    </div>
+  </div>
+  <div class="mc" style="margin-bottom:8px;"><div class="mc-label">Combined total spend this month (₹)</div><div class="mc-purpose">Auto-calculated from Meta + Google above</div><input type="number" id="a-spend" placeholder="0" readonly style="opacity:0.7;cursor:not-allowed;"><div class="mc-delta" id="d-a-spend"></div></div>
+
+  <div class="st">Creatives delivered this month</div>
+  <div class="creatives-summary">
+    <div class="creative-count-card"><div class="creative-count-label">Static posts</div><div class="creative-count-val" id="a-c-static-display">0</div><input type="number" id="a-c-static" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('a');rAC()"></div>
+    <div class="creative-count-card"><div class="creative-count-label">Carousels</div><div class="creative-count-val" id="a-c-carousel-display">0</div><input type="number" id="a-c-carousel" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('a');rAC()"></div>
+    <div class="creative-count-card"><div class="creative-count-label">Reels / Videos</div><div class="creative-count-val" id="a-c-reel-display">0</div><input type="number" id="a-c-reel" placeholder="0" style="width:100%;margin-top:6px;font-size:13px;font-weight:600;background:transparent;border:none;border-bottom:1.5px solid var(--border2);outline:none;color:var(--text);padding-bottom:2px;text-align:center;" oninput="updateCreativeTotals('a');rAC()"></div>
+    <div class="creative-count-card" style="border-color:var(--green);background:var(--green-l);"><div class="creative-count-label" style="color:var(--green);">Total delivered</div><div class="creative-count-val" id="a-creatives-total" style="color:var(--green);">0</div><div class="creative-count-target">Target: 16/month</div></div>
+  </div>
+
+  <div class="st">Top 5 creatives by reach this month</div>
+  <div class="top-creatives-wrap">
+    <div class="top-creative-row top-creative-header"><div>#</div><div>Creative name / description</div><div>Format</div><div>Reach</div><div class="hm-col">Eng %</div><div class="hm-col">Platform</div></div>
+    <div class="top-creative-row"><div><div class="rank-badge r1">1</div></div><td><input id="a-tc1-name" placeholder="e.g. Anandvann walkthrough reel"></td><td><select id="a-tc1-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Ad</option></select></td><td><input type="number" id="a-tc1-reach" placeholder="0" oninput="rAC()"></td><td class="hm-col"><input type="number" id="a-tc1-eng" placeholder="0.0"></td><td class="hm-col"><select id="a-tc1-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r2">2</div></div><td><input id="a-tc2-name" placeholder="Creative name"></td><td><select id="a-tc2-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Ad</option></select></td><td><input type="number" id="a-tc2-reach" placeholder="0" oninput="rAC()"></td><td class="hm-col"><input type="number" id="a-tc2-eng" placeholder="0.0"></td><td class="hm-col"><select id="a-tc2-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r3">3</div></div><td><input id="a-tc3-name" placeholder="Creative name"></td><td><select id="a-tc3-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Ad</option></select></td><td><input type="number" id="a-tc3-reach" placeholder="0" oninput="rAC()"></td><td class="hm-col"><input type="number" id="a-tc3-eng" placeholder="0.0"></td><td class="hm-col"><select id="a-tc3-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r4">4</div></div><td><input id="a-tc4-name" placeholder="Creative name"></td><td><select id="a-tc4-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Ad</option></select></td><td><input type="number" id="a-tc4-reach" placeholder="0" oninput="rAC()"></td><td class="hm-col"><input type="number" id="a-tc4-eng" placeholder="0.0"></td><td class="hm-col"><select id="a-tc4-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+    <div class="top-creative-row"><div><div class="rank-badge r5">5</div></div><td><input id="a-tc5-name" placeholder="Creative name"></td><td><select id="a-tc5-format"><option>—</option><option>Static</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Ad</option></select></td><td><input type="number" id="a-tc5-reach" placeholder="0" oninput="rAC()"></td><td class="hm-col"><input type="number" id="a-tc5-eng" placeholder="0.0"></td><td class="hm-col"><select id="a-tc5-platform"><option>—</option><option>Instagram</option><option>Facebook</option><option>Both</option></select></td></div>
+  </div>
+
+  <div class="st">Social media organic — monthly</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Total post reach</div><div class="mc-purpose">Total unique people who saw Anandvann posts this month</div><input type="number" id="a-reach" placeholder="0" oninput="upOv('a','reach');rAC()"><div class="mc-delta" id="d-a-reach"></div></div>
+    <div class="mc"><div class="mc-label">Avg engagement rate %</div><div class="mc-purpose">Monthly average. 3 to 5% is healthy for real estate</div><input type="number" id="a-eng" placeholder="0.0" step="0.1"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Total reel views</div><div class="mc-purpose">Total views across all reels this month</div><input type="number" id="a-reels" placeholder="0" oninput="rAC()"><div class="mc-delta" id="d-a-reels"></div></div>
+    <div class="mc"><div class="mc-label">Avg story completion %</div><div class="mc-purpose">Monthly average — high rate means messaging holds attention</div><input type="number" id="a-scr" placeholder="0" oninput="rAC()"><div class="mc-delta" id="d-a-scr"></div></div>
+    <div class="mc"><div class="mc-label">Total saves</div><div class="mc-purpose">Strong buying intent signal across the month</div><input type="number" id="a-saves" placeholder="0" oninput="rAC()"><div class="mc-delta" id="d-a-saves"></div></div>
+    <div class="mc"><div class="mc-label">Total story link clicks</div><div class="mc-purpose">Monthly bridge between social content and landing page</div><input type="number" id="a-slc" placeholder="0" oninput="rAC()"><div class="mc-delta" id="d-a-slc"></div></div>
+  </div>
+
+  <div class="st">Landing page SEO — monthly</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Keywords top 10</div><div class="mc-purpose">Out of 10 agreed landing page keywords at month end</div><input type="number" id="a-kw" placeholder="0"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Landing page visits</div><div class="mc-purpose">Total monthly visits to the Anandvann landing page</div><input type="number" id="a-lpv" placeholder="0" oninput="upOv('a','lpv');rAC()"><div class="mc-delta" id="d-a-lpv"></div></div>
+    <div class="mc"><div class="mc-label">Avg bounce rate %</div><div class="mc-purpose">Monthly average. Above 60% means page not compelling</div><input type="number" id="a-br" placeholder="0" oninput="upOv('a','br',true);rAC()"><div class="mc-delta" id="d-a-br"></div></div>
+    <div class="mc"><div class="mc-label">Avg time on page (sec)</div><div class="mc-purpose">Monthly average. Under 30s means people not engaging</div><input type="number" id="a-top" placeholder="0" oninput="upOv('a','top')"><div class="mc-delta" id="d-a-top"></div></div>
+  </div>
+
+  <div class="st">Influencer and UGC — monthly</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Creators activated</div><div class="mc-purpose">Total creators who posted about Anandvann this month</div><input type="number" id="a-inf" placeholder="0"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Combined influencer reach</div><div class="mc-purpose">Total combined followers of all creators this month</div><input type="number" id="a-ireach" placeholder="0" oninput="upOv('a','ireach')"><div class="mc-delta" id="d-a-ireach"></div></div>
+    <div class="mc"><div class="mc-label">UGC pieces generated</div><div class="mc-purpose">Real people posting about Anandvann this month</div><input type="number" id="a-ugc" placeholder="0"><div class="mc-delta"></div></div>
+    <div class="mc"><div class="mc-label">Cost per engagement (₹)</div><div class="mc-purpose">Monthly influencer spend ÷ total engagements</div><input type="number" id="a-cpe" placeholder="0" oninput="upOv('a','cpe',true)"><div class="mc-delta" id="d-a-cpe"></div></div>
+  </div>
+
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Influencer brief signed off before all launches this month</span><span class="ci-pur">Protects against off-brand or RERA non-compliant content</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">A/B test results documented and shared this month</span><span class="ci-pur">If not testing monthly, CPL optimisation is guesswork</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Lead funnel dashboard updated in Data Studio</span><span class="ci-pur">Monthly dashboard should reflect actual funnel performance</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Agency responded to all queries within 2 business days</span><span class="ci-pur">Contract sets 2-day response window — log any breaches</span></div></label>
+  </div>
+
+  <div class="st">Monthly notes</div>
+  <textarea class="na" id="a-notes" placeholder="Month summary — lead quality, best performing platform, top creative observations, CPL trend, agency feedback, action items for next month..."></textarea>
+  <div style="margin-top:20px;"><button class="history-toggle" onclick="toggleHist('a')">View saved months history</button><div class="history-body" id="hb-a"></div></div>
+</div>
+
+<!-- ===== OVERSIGHT ===== -->
+<div id="panel-c" class="panel">
+  <div class="banner-c">
+    <div class="banner-left"><div class="bicon bi-c">🛡️</div><div><div class="btitle">Contract oversight</div><div class="bsub">Both brands — monthly compliance</div></div></div>
+    <div class="banner-month" id="bm-c">—</div>
+  </div>
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-label">Contract Month</div><div class="ov-value" id="ov-c-month-num">—</div><div class="ov-delta" id="ovd-c-month-num"></div></div>
+    <div class="ov-card"><div class="ov-label">Lock-in Left (mo)</div><div class="ov-value" id="ov-c-lockin">—</div><div class="ov-delta" id="ovd-c-lockin"></div></div>
+    <div class="ov-card"><div class="ov-label">Monthly Retainer ₹</div><div class="ov-value" id="ov-c-retainer">—</div><div class="ov-delta" id="ovd-c-retainer"></div></div>
+    <div class="ov-card"><div class="ov-label">Cumulative Spend ₹</div><div class="ov-value" id="ov-c-cumspend">—</div><div class="ov-delta" id="ovd-c-cumspend"></div></div>
+    <div class="ov-card"><div class="ov-label">Open Issues</div><div class="ov-value" id="ov-c-issues">—</div><div class="ov-delta" id="ovd-c-issues"></div></div>
+  </div>
+
+  <div class="st">Visual analytics</div>
+  <div class="charts-2col">
+    <div class="chart-card"><div class="chart-title">Contract progress</div><div class="chart-sub">Months completed vs 6-month lock-in period</div>
+      <div style="display:flex;align-items:center;gap:20px;padding:10px 0;">
+        <div style="position:relative;width:110px;height:110px;flex-shrink:0;"><canvas id="chart-c-donut"></canvas><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span id="cp-pct" style="font-size:20px;font-weight:700;color:var(--text)">0%</span><span style="font-size:9px;color:var(--text2)">complete</span></div></div>
+        <div style="flex:1;"><div style="font-size:12px;color:var(--text2);margin-bottom:6px;">6-month lock-in total</div><div style="height:10px;background:var(--surface2);border-radius:5px;overflow:hidden;margin-bottom:8px;"><div id="cp-bar" style="height:100%;background:var(--blue);border-radius:5px;width:0%;transition:width 0.4s;"></div></div><div id="cp-text" style="font-size:11px;color:var(--text2);">Enter month number below</div></div>
+      </div>
+    </div>
+    <div class="chart-card"><div class="chart-title">Cumulative retainer spend</div><div class="chart-sub">Running total spend over contract months</div><div style="position:relative;height:160px;"><canvas id="chart-c-spend"></canvas></div></div>
+  </div>
+
+  <div class="st">Invoice and payment — monthly check</div>
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Invoice received by 10th of this month</span><span class="ci-pur">Contract requires invoices by the 10th. Late invoices disrupt accounts payable</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Invoice amount matches agreed retainer ₹1,10,000</span><span class="ci-pur">Any deviation needs written justification before payment</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">GST charged separately — not inside retainer</span><span class="ci-pur">Contract states taxes are extra. GST must appear as a separate line item</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Payment made within 15 days of invoice</span><span class="ci-pur">Delays beyond 15 days attract MSME Act interest charges</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Media and influencer spend transferred in advance</span><span class="ci-pur">Agency requires this upfront per contract — missing it can pause campaigns</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Third-party costs pre-approved in writing this month</span><span class="ci-pur">Any cost incurred on your behalf needs written approval. 10% facilitation fee applies otherwise</span></div></label>
+  </div>
+
+  <div class="st">Monthly deliverables received</div>
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Monthly Performance Review (MPR) received by 7th</span><span class="ci-pur">Contract requires MPR delivered by the 7th of the following month</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Google Data Studio dashboard updated this month</span><span class="ci-pur">Live dashboard is a contract deliverable — must be current</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Keyword rankings report received (all 30 + 10 keywords)</span><span class="ci-pur">Monthly deliverable per contract — should show position for every keyword</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Backlink tracker received showing ~30 new backlinks</span><span class="ci-pur">Contract deliverable — verify quality not just quantity</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">5 blogs published and indexed this month</span><span class="ci-pur">Contract requires 5 blogs of 800–1000 words. Check Google indexing separately</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">AEO content plan received this month</span><span class="ci-pur">AI Engine Optimisation plan — contract deliverable for GEO visibility</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Quarterly Performance Review (QPR) received (if due)</span><span class="ci-pur">QPR is due every 3 months — check if this month is a QPR month</span></div></label>
+  </div>
+
+  <div class="st">Agency responsiveness log — this month</div>
+  <div class="tw"><table><thead><tr><th>Issue raised<span class="th-sub">What you flagged</span></th><th>Date raised</th><th>Responded in 2 days?<span class="th-sub">Contract requirement</span></th></tr></thead><tbody>
+    <tr><td><input placeholder="e.g. creative revision request"></td><td><input type="date"></td><td><select><option>—</option><option>Yes</option><option>No — flag this</option></select></td></tr>
+    <tr><td><input placeholder="e.g. campaign performance query"></td><td><input type="date"></td><td><select><option>—</option><option>Yes</option><option>No — flag this</option></select></td></tr>
+    <tr><td><input placeholder="e.g. report request"></td><td><input type="date"></td><td><select><option>—</option><option>Yes</option><option>No — flag this</option></select></td></tr>
+    <tr><td><input placeholder="e.g. other issue"></td><td><input type="date"></td><td><select><option>—</option><option>Yes</option><option>No — flag this</option></select></td></tr>
+  </tbody></table></div>
+
+  <div class="st">Data access — monthly verification</div>
+  <div class="cl">
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">GA4 — own admin access confirmed active</span><span class="ci-pur">Verify organic traffic independently this month</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Meta Business Manager — own admin access confirmed active</span><span class="ci-pur">Check your own access to Meta spend and lead data monthly</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Google Ads — own admin access confirmed active</span><span class="ci-pur">Retain all campaign history if agency relationship ends</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Monthly numbers independently verified against own access</span><span class="ci-pur">Cross-check at least leads, spend, and organic traffic against your own platforms</span></div></label>
+    <label class="ci"><input type="checkbox" onchange="tci(this)"><div class="ci-body"><span class="ci-lbl">Client feedback provided within 7 business days on all items</span><span class="ci-pur">Contract: no response within 7 days = deemed accepted. Late feedback extends timelines</span></div></label>
+  </div>
+
+  <div class="st">Escalation log</div>
+  <div class="tw"><table><thead><tr><th>Issue</th><th>Escalated to<span class="th-sub">L2 Aastha, L3 Snehja or Ankit</span></th><th>Level</th><th>Status</th></tr></thead><tbody>
+    <tr><td><input placeholder="describe issue"></td><td><input placeholder="e.g. Aastha Jhunjhunwala"></td><td><select><option>—</option><option>L1</option><option>L2</option><option>L3</option></select></td><td><select><option>—</option><option>Open</option><option>Resolved</option><option>Pending</option></select></td></tr>
+    <tr><td><input placeholder="describe issue"></td><td><input placeholder="name"></td><td><select><option>—</option><option>L1</option><option>L2</option><option>L3</option></select></td><td><select><option>—</option><option>Open</option><option>Resolved</option><option>Pending</option></select></td></tr>
+  </tbody></table></div>
+
+  <div class="st">Contract health — monthly</div>
+  <div class="mg">
+    <div class="mc"><div class="mc-label">Contract month number</div><div class="mc-purpose">Which month of the contract is this? Min lock-in is 6 months</div><input type="number" id="c-month-num" placeholder="1" oninput="upOv('c','month-num');rCC()"><div class="mc-delta" id="d-c-month-num"></div></div>
+    <div class="mc"><div class="mc-label">Lock-in remaining (months)</div><div class="mc-purpose">Start exit conversations 1 month before lock-in ends</div><input type="number" id="c-lockin" placeholder="6" oninput="upOv('c','lockin')"><div class="mc-delta" id="d-c-lockin"></div></div>
+    <div class="mc"><div class="mc-label">This month retainer (₹)</div><div class="mc-purpose">Retainer paid this month — should be ₹1,10,000 + GST</div><input type="number" id="c-retainer" placeholder="110000" oninput="upOv('c','retainer')"><div class="mc-delta" id="d-c-retainer"></div></div>
+    <div class="mc"><div class="mc-label">Cumulative spend to date (₹)</div><div class="mc-purpose">Total retainer paid so far. Benchmark against total leads and bookings</div><input type="number" id="c-cumspend" placeholder="0" oninput="upOv('c','cumspend');rCC()"><div class="mc-delta" id="d-c-cumspend"></div></div>
+    <div class="mc"><div class="mc-label">Open issues count</div><div class="mc-purpose">Unresolved issues this month. Rising number signals deteriorating relationship</div><input type="number" id="c-issues" placeholder="0" oninput="upOv('c','issues',true)"><div class="mc-delta" id="d-c-issues"></div></div>
+    <div class="mc"><div class="mc-label">Overall agency rating (1–10)</div><div class="mc-purpose">Your subjective monthly rating of agency performance</div><input type="number" id="c-rating" min="1" max="10" placeholder="0" oninput="upOv('c','rating')"><div class="mc-delta" id="d-c-rating"></div></div>
+  </div>
+
+  <div class="st">Monthly notes</div>
+  <textarea class="na" id="c-notes" placeholder="Contract concerns this month, invoice status, payment dates, escalation updates, overall service quality assessment, plans for next month..."></textarea>
+  <div style="margin-top:20px;"><button class="history-toggle" onclick="toggleHist('c')">View saved months history</button><div class="history-body" id="hb-c"></div></div>
+</div>
+</div>
+
+<div class="save-bar">
+  <div class="save-status" id="save-status">Connecting to database...</div>
+  <div class="save-actions">
+    <button class="btn-sec" onclick="exportCSV()">Export CSV</button>
+    <button class="btn-save" id="btn-save-bottom" onclick="saveMonth()" disabled>Save month</button>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://wrdxplkgnpiwqhzujxki.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyZHhwbGtnbnBpd3FoenVqeGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMjUzNzEsImV4cCI6MjA5NTcwMTM3MX0.yl3-aQEGJByPPL2VJI-tXbBacAJFHi30wGi71jZAsqM';
+
+async function sbSelect(){const r=await fetch(SB_URL+'/rest/v1/weekly_data?select=*&order=created_at.asc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'}});if(!r.ok){const e=await r.json();throw new Error(e.message||e.hint||r.status);}return r.json();}
+async function sbUpsert(brand,week_label,data){const r=await fetch(SB_URL+'/rest/v1/weekly_data?on_conflict=brand,week_label',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({brand,week_label,data})});if(!r.ok){const e=await r.json();throw new Error(e.message||e.hint||r.status);}}
+
+// MONTH NAVIGATION — uses month names as keys
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let monthOffset=0; // 0 = current month
+
+function getMonthLabel(offset){
+  const d=new Date(2026,4,1); // base: May 2026
+  d.setMonth(d.getMonth()+offset);
+  return MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
+
+let DB={r:[],a:[],c:[]};
+
+// Sort each brand's history by real calendar date (labels look like "Jul 2025")
+function monthKey(label){const p=(label||'').split(' ');const mi=MONTHS.indexOf(p[0]);const yr=parseInt(p[1],10)||0;return yr*12+(mi<0?0:mi);}
+function sortDB(){['r','a','c'].forEach(b=>DB[b].sort((x,y)=>monthKey(x.month)-monthKey(y.month)));}
+const CHARTS={};
+const C={blue:'#185FA5',green:'#0F6E56',maroon:'#72243E',amber:'#BA7517',coral:'#D85A30',purple:'#7F77DD',up:'#639922',dn:'#E24B4A',meta:'#0866FF',google:'#EA4335',grid:'rgba(120,120,120,0.12)'};
+
+function badge(t,txt){const el=document.getElementById('sync-badge');el.textContent=txt;el.className='sync-badge '+(t==='ok'?'s-ok':t==='err'?'s-err':'s-load');}
+function enableSave(){document.getElementById('btn-save').disabled=false;document.getElementById('btn-save-bottom').disabled=false;}
+
+function updateMonthDisplay(){
+  const lbl=getMonthLabel(monthOffset);
+  document.getElementById('ml-header').textContent=lbl;
+  document.getElementById('bm-r').textContent=lbl;
+  document.getElementById('bm-a').textContent=lbl;
+  document.getElementById('bm-c').textContent=lbl;
+}
+
+function updateSpendTotal(brand){
+  const msEl=document.getElementById(brand+'-meta-spend-display');
+  const gsEl=document.getElementById(brand+'-google-spend-display');
+  if(!msEl||!gsEl)return; // brand has no spend section (e.g. Oversight)
+  const ms=parseFloat(document.getElementById(brand+'-meta-spend')?.value)||0;
+  const gs=parseFloat(document.getElementById(brand+'-google-spend')?.value)||0;
+  const total=ms+gs;
+  const el=document.getElementById(brand+'-spend');
+  if(el)el.value=total||'';
+  msEl.textContent='₹ '+ms.toLocaleString('en-IN');
+  gsEl.textContent='₹ '+gs.toLocaleString('en-IN');
+  upOv(brand,'spend');
+}
+
+function updateCreativeTotals(brand){
+  const staticEl=document.getElementById(brand+'-c-static-display');
+  const carEl=document.getElementById(brand+'-c-carousel-display');
+  const reelEl=document.getElementById(brand+'-c-reel-display');
+  const totalEl=document.getElementById(brand+'-creatives-total');
+  if(!staticEl||!carEl||!reelEl||!totalEl)return; // brand has no creatives section (e.g. Oversight)
+  const s=parseInt(document.getElementById(brand+'-c-static')?.value)||0;
+  const c=parseInt(document.getElementById(brand+'-c-carousel')?.value)||0;
+  const rv=parseInt(document.getElementById(brand+'-c-reel')?.value)||0;
+  const total=s+c+rv;
+  staticEl.textContent=s;
+  carEl.textContent=c;
+  reelEl.textContent=rv;
+  totalEl.textContent=total;
+  const ov=document.getElementById('ov-'+brand+'-creatives-total');
+  if(ov)ov.textContent=total||'—';
+}
+
+async function init(){
+  updateMonthDisplay();
+  badge('load','connecting...');
+  try{
+    const rows=await sbSelect();
+    DB={r:[],a:[],c:[]};
+    rows.forEach(row=>{if(DB[row.brand])DB[row.brand].push({month:row.week_label,...row.data});});
+    sortDB();
+    loadMonthIntoForm(monthOffset);
+    badge('ok','synced');
+    enableSave();
+    document.getElementById('save-status').textContent='Connected. Fill in this month and save.';
+    refreshAllDeltas();rRC();rAC();rCC();renderAllHistory();
+  }catch(e){
+    badge('err','connection error');
+    document.getElementById('save-status').textContent='Error: '+e.message;
+    document.getElementById('save-status').className='save-status err';
+    console.error(e);
+  }
+}
+
+function cm(dir){
+  monthOffset+=dir;
+  updateMonthDisplay();
+  loadMonthIntoForm(monthOffset);
+  refreshAllDeltas();
+}
+
+function loadMonthIntoForm(offset){
+  const m=getMonthLabel(offset);
+  ['r','a','c'].forEach(brand=>{
+    document.querySelectorAll('#panel-'+brand+' input[type=number], #panel-'+brand+' textarea').forEach(el=>{if(!el.readOnly)el.value='';});
+    const entry=DB[brand].find(e=>e.month===m);
+    if(!entry)return;
+    Object.keys(entry).forEach(k=>{if(k==='month')return;const el=document.getElementById(brand+'-'+k);if(el&&!el.readOnly)el.value=entry[k];});
+    updateSpendTotal(brand);
+    updateCreativeTotals(brand);
+  });
+  refreshAllDeltas();rRC();rAC();rCC();
+}
+
+function sw(name,btn){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('ar','aa','ac'));document.getElementById('panel-'+name).classList.add('active');btn.classList.add(name==='r'?'ar':name==='a'?'aa':'ac');}
+function tci(cb){cb.closest('.ci').classList.toggle('checked',cb.checked);}
+
+function calcDelta(brand,field,inv){
+  inv=inv||false;
+  const h=DB[brand];
+  const el=document.getElementById('d-'+brand+'-'+field);if(!el)return;
+  const inp=document.getElementById(brand+'-'+field);if(!inp)return;
+  const curr=parseFloat(inp.value)||0;
+  if(h.length===0){el.innerHTML='<span class="dfl">save a month first</span>';return;}
+  const prev=parseFloat(h[h.length-1][field])||0;
+  if(prev===0){el.innerHTML='<span class="dfl">—</span>';return;}
+  const diff=curr-prev,pct=((diff/prev)*100).toFixed(1);
+  if(diff===0){el.innerHTML='<span class="dfl">no change</span>';return;}
+  const good=inv?diff<0:diff>0;
+  el.innerHTML='<span class="'+(good?'dup':'ddn')+'">'+(diff>0?'+':'')+diff.toLocaleString('en-IN')+' ('+pct+'%)</span>';
+}
+
+function upOv(brand,field,inv){
+  inv=inv||false;
+  calcDelta(brand,field,inv);
+  const val=document.getElementById(brand+'-'+field)?.value;
+  const ov=document.getElementById('ov-'+brand+'-'+field);
+  const ovd=document.getElementById('ovd-'+brand+'-'+field);
+  if(ov&&val){
+    ov.textContent=parseFloat(val).toLocaleString('en-IN');
+    if(ovd&&DB[brand].length>0){
+      const prev=parseFloat(DB[brand][DB[brand].length-1][field])||0,curr=parseFloat(val)||0;
+      if(prev>0){const diff=curr-prev,pct=((diff/prev)*100).toFixed(1),good=inv?diff<0:diff>0;ovd.innerHTML='<span style="color:'+(good?'var(--up)':'var(--dn)')+'\">'+(diff>0?'+':'')+pct+'% vs last month</span>';}
+    }
+  }
+}
+
+function refreshAllDeltas(){
+  [['r','ig'],['r','fb'],['r','reach'],['r','eng'],['r','organic'],['r','bl'],['r','bounce',true],['r','meta-spend',true],['r','google-spend',true],['r','spend'],
+   ['a','leads'],['a','cpl',true],['a','sv'],['a','csv',true],['a','book'],['a','roas'],['a','lpcr'],['a','spend'],['a','meta-spend',true],['a','google-spend',true],['a','reach'],['a','lpv'],['a','br',true],['a','ireach'],['a','cpe',true],
+   ['c','month-num'],['c','lockin'],['c','retainer'],['c','cumspend'],['c','issues',true],['c','rating']
+  ].forEach(function(args){calcDelta(args[0],args[1],args[2]);});
+}
+
+function gv(id){const e=document.getElementById(id);return e?e.value:'';}
+
+function collectData(brand){
+  if(brand==='r')return{ig:gv('r-ig'),fb:gv('r-fb'),reach:gv('r-reach'),eng:gv('r-eng'),scr:gv('r-scr'),saves:gv('r-saves'),shares:gv('r-shares'),organic:gv('r-organic'),da:gv('r-da'),bl:gv('r-bl'),bounce:gv('r-bounce'),session:gv('r-session'),blogs:gv('r-blogs'),indexed:gv('r-indexed'),listings:gv('r-listings'),quora:gv('r-quora'),spend:gv('r-spend'),'meta-spend':gv('r-meta-spend'),'meta-reach':gv('r-meta-reach'),'meta-clicks':gv('r-meta-clicks'),'meta-ctr':gv('r-meta-ctr'),'meta-cpc':gv('r-meta-cpc'),'meta-cpm':gv('r-meta-cpm'),'google-spend':gv('r-google-spend'),'google-impressions':gv('r-google-impressions'),'google-clicks':gv('r-google-clicks'),'google-ctr':gv('r-google-ctr'),'google-cpc':gv('r-google-cpc'),'google-qs':gv('r-google-qs'),'c-static':gv('r-c-static'),'c-carousel':gv('r-c-carousel'),'c-reel':gv('r-c-reel'),'creatives-total':document.getElementById('r-creatives-total')?.textContent||'0','tc1-name':gv('r-tc1-name'),'tc1-reach':gv('r-tc1-reach'),'tc1-eng':gv('r-tc1-eng'),'tc2-name':gv('r-tc2-name'),'tc2-reach':gv('r-tc2-reach'),'tc2-eng':gv('r-tc2-eng'),'tc3-name':gv('r-tc3-name'),'tc3-reach':gv('r-tc3-reach'),'tc3-eng':gv('r-tc3-eng'),'tc4-name':gv('r-tc4-name'),'tc4-reach':gv('r-tc4-reach'),'tc4-eng':gv('r-tc4-eng'),'tc5-name':gv('r-tc5-name'),'tc5-reach':gv('r-tc5-reach'),'tc5-eng':gv('r-tc5-eng'),notes:gv('r-notes')};
+  if(brand==='a')return{leads:gv('a-leads'),cpl:gv('a-cpl'),sv:gv('a-sv'),csv:gv('a-csv'),book:gv('a-book'),roas:gv('a-roas'),lpcr:gv('a-lpcr'),spend:gv('a-spend'),'meta-spend':gv('a-meta-spend'),'meta-leads':gv('a-meta-leads'),'meta-cpl':gv('a-meta-cpl'),'meta-ctr':gv('a-meta-ctr'),'meta-cpc':gv('a-meta-cpc'),'google-spend':gv('a-google-spend'),'google-leads':gv('a-google-leads'),'google-cpl':gv('a-google-cpl'),'google-ctr':gv('a-google-ctr'),'google-cpc':gv('a-google-cpc'),reach:gv('a-reach'),eng:gv('a-eng'),reels:gv('a-reels'),scr:gv('a-scr'),saves:gv('a-saves'),slc:gv('a-slc'),kw:gv('a-kw'),lpv:gv('a-lpv'),br:gv('a-br'),top:gv('a-top'),inf:gv('a-inf'),ireach:gv('a-ireach'),ugc:gv('a-ugc'),cpe:gv('a-cpe'),'c-static':gv('a-c-static'),'c-carousel':gv('a-c-carousel'),'c-reel':gv('a-c-reel'),'creatives-total':document.getElementById('a-creatives-total')?.textContent||'0','tc1-name':gv('a-tc1-name'),'tc1-reach':gv('a-tc1-reach'),'tc1-eng':gv('a-tc1-eng'),'tc2-name':gv('a-tc2-name'),'tc2-reach':gv('a-tc2-reach'),'tc2-eng':gv('a-tc2-eng'),'tc3-name':gv('a-tc3-name'),'tc3-reach':gv('a-tc3-reach'),'tc3-eng':gv('a-tc3-eng'),'tc4-name':gv('a-tc4-name'),'tc4-reach':gv('a-tc4-reach'),'tc4-eng':gv('a-tc4-eng'),'tc5-name':gv('a-tc5-name'),'tc5-reach':gv('a-tc5-reach'),'tc5-eng':gv('a-tc5-eng'),notes:gv('a-notes')};
+  if(brand==='c')return{'month-num':gv('c-month-num'),lockin:gv('c-lockin'),retainer:gv('c-retainer'),cumspend:gv('c-cumspend'),issues:gv('c-issues'),rating:gv('c-rating'),notes:gv('c-notes')};
+}
+
+async function saveMonth(){
+  const m=getMonthLabel(monthOffset);
+  badge('load','saving...');
+  document.getElementById('btn-save').disabled=true;
+  document.getElementById('btn-save-bottom').disabled=true;
+  try{
+    for(const brand of['r','a','c']){
+      const data=collectData(brand);
+      await sbUpsert(brand,m,data);
+      const idx=DB[brand].findIndex(e=>e.month===m);
+      if(idx>=0)DB[brand][idx]={month:m,...data};
+      else DB[brand].push({month:m,...data});
+    }
+    sortDB();
+    badge('ok','saved');
+    const st=document.getElementById('save-status');
+    st.textContent='Saved and synced — '+m;
+    st.className='save-status ok';
+    setTimeout(()=>{st.textContent='Connected. Fill in this month and save.';st.className='save-status';},4000);
+    renderAllHistory();rRC();rAC();rCC();refreshAllDeltas();
+  }catch(e){
+    badge('err','save failed');
+    document.getElementById('save-status').textContent='Save failed: '+e.message;
+    document.getElementById('save-status').className='save-status err';
+    console.error(e);
+  }finally{
+    document.getElementById('btn-save').disabled=false;
+    document.getElementById('btn-save-bottom').disabled=false;
+  }
+}
+
+// CHARTS
+function bO(yLabel,inv){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0}},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},reverse:inv||false,title:{display:!!yLabel,text:yLabel||'',font:{size:9},color:'#888'}}}};}
+function mkC(id,type,data,opts){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}const el=document.getElementById(id);if(!el)return;CHARTS[id]=new Chart(el,{type,data,options:opts||bO()});}
+function gL(b,n){n=n||12;return DB[b].slice(-n).map(e=>e.month);}
+function gV(b,f,n){n=n||12;return DB[b].slice(-n).map(e=>parseFloat(e[f])||0);}
+function showEmpty(id,msg){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}const el=document.getElementById(id);if(!el)return;const p=el.parentElement;if(!p)return;let em=p.querySelector('.chart-empty');if(!em){em=document.createElement('div');em.className='chart-empty';p.appendChild(em);}em.textContent=msg||'Save 2+ months to see trend';}
+function clearEmpty(id){const el=document.getElementById(id);if(!el)return;const p=el.parentElement;if(!p)return;const em=p.querySelector('.chart-empty');if(em)em.remove();}
+
+function rRC(){
+  const h=DB.r;
+  if(h.length<2)showEmpty('chart-r-followers');
+  else{clearEmpty('chart-r-followers');mkC('chart-r-followers','line',{labels:gL('r'),datasets:[{label:'Instagram',data:gV('r','ig'),borderColor:C.blue,backgroundColor:'rgba(24,95,165,0.1)',fill:true,tension:0.4,pointRadius:3},{label:'Facebook',data:gV('r','fb'),borderColor:C.purple,backgroundColor:'rgba(127,119,221,0.08)',fill:true,tension:0.4,pointRadius:3}]},{...bO(),plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}}});}
+  if(h.length<2)showEmpty('chart-r-organic');
+  else{clearEmpty('chart-r-organic');const V=gV('r','organic');mkC('chart-r-organic','bar',{labels:gL('r'),datasets:[{data:V,backgroundColor:V.map((v,i)=>i===0?C.blue:v>=V[i-1]?C.up:C.dn),borderRadius:4}]},bO('visits'));}
+  clearEmpty('chart-r-eng');
+  mkC('chart-r-eng','bar',{labels:['Eng %','Story %','Saves','Shares'],datasets:[{data:[parseFloat(document.getElementById('r-eng')?.value)||0,parseFloat(document.getElementById('r-scr')?.value)||0,Math.min(parseFloat(document.getElementById('r-saves')?.value)||0,100),Math.min(parseFloat(document.getElementById('r-shares')?.value)||0,100)],backgroundColor:[C.blue,C.purple,C.up,C.amber],borderRadius:4}]},{...bO(),plugins:{legend:{display:false}}});
+  const ms=parseFloat(document.getElementById('r-meta-spend')?.value)||0,gs=parseFloat(document.getElementById('r-google-spend')?.value)||0;
+  if(ms+gs>0){clearEmpty('chart-r-spend-split');mkC('chart-r-spend-split','doughnut',{labels:['Meta','Google'],datasets:[{data:[ms,gs],backgroundColor:[C.meta,C.google],borderWidth:0,hoverOffset:4}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{font:{size:11},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>`${c.label}: ₹${c.raw.toLocaleString('en-IN')} (${Math.round((c.raw/(ms+gs))*100)}%)`}}}});}
+  else if(h.length>=2){clearEmpty('chart-r-spend-split');mkC('chart-r-spend-split','bar',{labels:gL('r'),datasets:[{label:'Meta',data:gV('r','meta-spend'),backgroundColor:C.meta,borderRadius:3},{label:'Google',data:gV('r','google-spend'),backgroundColor:C.google,borderRadius:3}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0},stacked:true},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},stacked:true}}});}
+  else showEmpty('chart-r-spend-split','Enter Meta + Google spend above');
+  if(h.length<2)showEmpty('chart-r-seo');
+  else{clearEmpty('chart-r-seo');mkC('chart-r-seo','bar',{labels:gL('r'),datasets:[{label:'Backlinks',data:gV('r','bl'),backgroundColor:C.blue,borderRadius:3,yAxisID:'y'},{label:'DA',data:gV('r','da'),type:'line',borderColor:C.amber,backgroundColor:'transparent',tension:0.4,pointRadius:3,yAxisID:'y1'}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0}},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'Backlinks',font:{size:9}}},y1:{position:'right',grid:{display:false},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'DA',font:{size:9}}}}});}
+  const cs=parseInt(document.getElementById('r-c-static')?.value)||0,cc=parseInt(document.getElementById('r-c-carousel')?.value)||0,cr=parseInt(document.getElementById('r-c-reel')?.value)||0;
+  clearEmpty('chart-r-creatives');
+  mkC('chart-r-creatives','bar',{labels:['Static','Carousel','Reels'],datasets:[{label:'Delivered',data:[cs,cc,cr],backgroundColor:[C.blue,C.purple,C.green],borderRadius:4},{label:'Target',data:[8,4,4],backgroundColor:['rgba(24,95,165,0.15)','rgba(127,119,221,0.15)','rgba(15,110,86,0.15)'],borderRadius:4}]},{...bO(),plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}}});
+}
+
+function rAC(){
+  const h=DB.a;
+  if(h.length<2)showEmpty('chart-a-leads');
+  else{clearEmpty('chart-a-leads');const V=gV('a','leads');mkC('chart-a-leads','bar',{labels:gL('a'),datasets:[{data:V,backgroundColor:V.map((v,i)=>i===0?C.green:v>=V[i-1]?C.up:C.dn),borderRadius:4}]},bO('leads'));}
+  if(h.length<2)showEmpty('chart-a-cpl');
+  else{clearEmpty('chart-a-cpl');const V=gV('a','cpl');mkC('chart-a-cpl','line',{labels:gL('a'),datasets:[{data:V,borderColor:C.coral,backgroundColor:'rgba(216,90,48,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:V.map((v,i)=>i===0?C.coral:v<=V[i-1]?C.up:C.dn)}]},bO('rupees'));}
+  const leads=parseFloat(document.getElementById('a-leads')?.value)||0,sv=parseFloat(document.getElementById('a-sv')?.value)||0,book=parseFloat(document.getElementById('a-book')?.value)||0;
+  const fEl=document.getElementById('funnel-a');
+  if(fEl){fEl.innerHTML='';const mx=Math.max(leads,1);[{l:'Total leads',v:leads,c:C.green},{l:'Site visits',v:sv,c:C.blue},{l:'Bookings',v:book,c:C.up}].forEach(r=>{fEl.innerHTML+='<div class="funnel-row"><div class="funnel-label">'+r.l+'</div><div class="funnel-bar-bg"><div class="funnel-bar-fill" style="width:'+Math.min((r.v/mx)*100,100)+'%;background:'+r.c+'"></div></div><div class="funnel-val">'+r.v+'</div></div>';});if(leads>0)fEl.innerHTML+='<div style="font-size:10px;color:var(--text3);margin-top:8px;font-style:italic;">Visit rate: '+Math.round((sv/leads)*100)+'% · Booking rate: '+(sv>0?Math.round((book/sv)*100):0)+'%</div>';}
+  const ams=parseFloat(document.getElementById('a-meta-spend')?.value)||0,ags=parseFloat(document.getElementById('a-google-spend')?.value)||0;
+  if(ams+ags>0){clearEmpty('chart-a-spend-split');mkC('chart-a-spend-split','doughnut',{labels:['Meta','Google'],datasets:[{data:[ams,ags],backgroundColor:[C.meta,C.google],borderWidth:0,hoverOffset:4}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{font:{size:11},boxWidth:10,padding:10}},tooltip:{callbacks:{label:c=>`${c.label}: ₹${c.raw.toLocaleString('en-IN')} (${Math.round((c.raw/(ams+ags))*100)}%)`}}}});}
+  else if(h.length>=2){clearEmpty('chart-a-spend-split');mkC('chart-a-spend-split','bar',{labels:gL('a'),datasets:[{label:'Meta',data:gV('a','meta-spend'),backgroundColor:C.meta,borderRadius:3},{label:'Google',data:gV('a','google-spend'),backgroundColor:C.google,borderRadius:3}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0},stacked:true},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},stacked:true}}});}
+  else showEmpty('chart-a-spend-split','Enter Meta + Google spend above');
+  if(h.length<2)showEmpty('chart-a-eff');
+  else{clearEmpty('chart-a-eff');mkC('chart-a-eff','bar',{labels:gL('a'),datasets:[{label:'Spend',data:gV('a','spend'),backgroundColor:'rgba(24,95,165,0.5)',borderRadius:3,yAxisID:'y'},{label:'Leads',data:gV('a','leads'),type:'line',borderColor:C.up,backgroundColor:'transparent',tension:0.4,pointRadius:4,yAxisID:'y1'}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0}},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'Spend',font:{size:9}}},y1:{position:'right',grid:{display:false},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'Leads',font:{size:9}}}}});}
+  const tcNames=[gv('a-tc1-name'),gv('a-tc2-name'),gv('a-tc3-name'),gv('a-tc4-name'),gv('a-tc5-name')];
+  const tcReach=[parseFloat(gv('a-tc1-reach'))||0,parseFloat(gv('a-tc2-reach'))||0,parseFloat(gv('a-tc3-reach'))||0,parseFloat(gv('a-tc4-reach'))||0,parseFloat(gv('a-tc5-reach'))||0];
+  if(tcReach.some(v=>v>0)){clearEmpty('chart-a-topcreatives');mkC('chart-a-topcreatives','bar',{labels:tcNames.map((n,i)=>n||(i+1+'.')),datasets:[{data:tcReach,backgroundColor:[C.amber,'#6B6B6B','#8B4513',C.blue,C.green],borderRadius:4}]},{...bO('reach'),plugins:{legend:{display:false}},indexAxis:'y'});}
+  else showEmpty('chart-a-topcreatives','Enter top 5 creative names + reach above');
+  if(h.length<2)showEmpty('chart-a-lp');
+  else{clearEmpty('chart-a-lp');mkC('chart-a-lp','line',{labels:gL('a'),datasets:[{label:'Visits',data:gV('a','lpv'),borderColor:C.blue,backgroundColor:'transparent',tension:0.4,pointRadius:3,yAxisID:'y'},{label:'Conv %',data:gV('a','lpcr'),borderColor:C.up,backgroundColor:'transparent',tension:0.4,pointRadius:3,borderDash:[4,3],yAxisID:'y1'},{label:'Bounce %',data:gV('a','br'),borderColor:C.dn,backgroundColor:'transparent',tension:0.4,pointRadius:3,borderDash:[2,2],yAxisID:'y1'}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888',maxRotation:0}},y:{grid:{color:C.grid},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'Visits',font:{size:9}}},y1:{position:'right',grid:{display:false},ticks:{font:{size:9},color:'#888'},title:{display:true,text:'%',font:{size:9}}}}});}
+}
+
+function rCC(){
+  const mnum=parseFloat(document.getElementById('c-month-num')?.value)||0;
+  const pct=Math.min(Math.round((mnum/6)*100),100);
+  document.getElementById('cp-pct').textContent=pct+'%';
+  document.getElementById('cp-bar').style.width=pct+'%';
+  document.getElementById('cp-bar').style.background=pct>=80?'var(--dn)':'var(--blue)';
+  document.getElementById('cp-text').textContent='Month '+mnum+' of 6 — '+Math.max(6-mnum,0)+' months remaining';
+  clearEmpty('chart-c-donut');
+  mkC('chart-c-donut','doughnut',{datasets:[{data:[Math.max(mnum,0),Math.max(6-mnum,0)],backgroundColor:[pct>=80?C.dn:C.blue,'rgba(120,120,120,0.15)'],borderWidth:0}]},{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}});
+  const h=DB.c;
+  if(h.length<2)showEmpty('chart-c-spend');
+  else{clearEmpty('chart-c-spend');mkC('chart-c-spend','line',{labels:gL('c'),datasets:[{data:gV('c','cumspend'),borderColor:C.maroon,backgroundColor:'rgba(114,36,62,0.1)',fill:true,tension:0.4,pointRadius:3}]},bO('₹'));}
+}
+
+function uAI(brand,idx,val){const el=document.getElementById('ai-'+brand+'-'+idx);if(el)el.textContent=val==='yes'?'✅':val==='no'?'❌':'—';}
+
+function renderAllHistory(){['r','a','c'].forEach(b=>renderHistory(b));}
+function toggleHist(b){const el=document.getElementById('hb-'+b);el.classList.toggle('open');renderHistory(b);}
+function renderHistory(b){
+  const body=document.getElementById('hb-'+b);
+  const hist=[...DB[b]].reverse();
+  if(hist.length===0){body.innerHTML='<div class="hist-row"><span style="color:var(--text3);font-size:12px">No saved months yet.</span></div>';return;}
+  body.innerHTML=hist.map(e=>{
+    let m='';
+    if(b==='r')m='<div class="hm"><span class="hml">IG</span><span class="hmv">'+(e.ig||'—')+'</span></div><div class="hm"><span class="hml">Organic</span><span class="hmv">'+(e.organic||'—')+'</span></div><div class="hm"><span class="hml">Meta ₹</span><span class="hmv">'+(e['meta-spend']||'—')+'</span></div><div class="hm"><span class="hml">Google ₹</span><span class="hmv">'+(e['google-spend']||'—')+'</span></div><div class="hm"><span class="hml">Creatives</span><span class="hmv">'+(e['creatives-total']||'—')+'</span></div>';
+    else if(b==='a')m='<div class="hm"><span class="hml">Leads</span><span class="hmv">'+(e.leads||'—')+'</span></div><div class="hm"><span class="hml">CPL</span><span class="hmv">₹'+(e.cpl||'—')+'</span></div><div class="hm"><span class="hml">Visits</span><span class="hmv">'+(e.sv||'—')+'</span></div><div class="hm"><span class="hml">Bookings</span><span class="hmv">'+(e.book||'—')+'</span></div><div class="hm"><span class="hml">Meta ₹</span><span class="hmv">'+(e['meta-spend']||'—')+'</span></div><div class="hm"><span class="hml">Google ₹</span><span class="hmv">'+(e['google-spend']||'—')+'</span></div>';
+    else m='<div class="hm"><span class="hml">Month</span><span class="hmv">'+(e['month-num']||'—')+'</span></div><div class="hm"><span class="hml">Lock-in left</span><span class="hmv">'+(e.lockin||'—')+' mo</span></div><div class="hm"><span class="hml">Retainer</span><span class="hmv">₹'+(e.retainer||'—')+'</span></div><div class="hm"><span class="hml">Cum spend</span><span class="hmv">₹'+(e.cumspend||'—')+'</span></div><div class="hm"><span class="hml">Rating</span><span class="hmv">'+(e.rating||'—')+'/10</span></div>';
+    return'<div class="hist-row"><div><div class="hist-month">'+e.month+'</div>'+(e.notes?'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+e.notes.substring(0,80)+(e.notes.length>80?'...':'')+'</div>':'')+'</div><div class="hist-metrics">'+m+'</div></div>';
+  }).join('');
+}
+
+function exportCSV(){
+  let csv='Brand,Month,Metric,Value\n';
+  ['r','a','c'].forEach(b=>{
+    const label=b==='r'?'Rameswara':b==='a'?'Anandvann':'Oversight';
+    DB[b].forEach(e=>{Object.keys(e).filter(k=>k!=='month'&&k!=='notes').forEach(k=>{csv+=label+',"'+e.month+'",'+k+','+e[k]+'\n';});});
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rameswara_monthly_tracker.csv';a.click();
+}
+
+init();
+</script>
+</body>
+</html>
